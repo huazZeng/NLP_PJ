@@ -1,10 +1,12 @@
 # 大模型数学能力微调实践
-## Baseline
+## Baseline SFT
 
 
-## Prompt
 
 
-## Finetune
+## 数据增强
+
+## LoRA
+
 
 
