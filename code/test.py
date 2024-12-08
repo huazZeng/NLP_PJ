@@ -25,7 +25,7 @@ import os
 import json
 
 # 读取原始数据
-json_file_path = 'MATH_test.jsonl'
+json_file_path = 'MATH_train.jsonl'
 with open(json_file_path, 'r', encoding="utf-8") as json_file:
     data = [json.loads(line) for line in json_file]
 

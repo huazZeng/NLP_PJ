@@ -7,7 +7,7 @@ https://zhuanlan.zhihu.com/p/681299172 数学推理综述
 
 ## 数据增强
 * https://arxiv.org/pdf/2310.05506  
-  * 问题增强的改写方式为根据人类知识设计的五条规则：Change specific numbers; Introduce fractions or percentages; Combine multiple concepts; Include a conditional statement; Increase the complexity of the problem.
+  * 问题增强的改写方式为根据人类知识设计的五条规则：Change specific numbers ; Introduce fractions or percentages; Combine multiple concepts; Include a conditional statement; Increase the complexity of the problem.
   * https://github.com/OFA-Sys/gsm8k-ScRel
 * 拿GPT生成一些（？）；问题拆解（？）
   
