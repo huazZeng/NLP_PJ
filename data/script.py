@@ -118,7 +118,7 @@ print(len(datas))
 for data in datas:
     answer_str = last_boxed_only_string(data['messages'][1]['content']) 
     answer_clean = remove_boxed(answer_str)
-    data['messages'][1]['content'] += ' #### ' 
+    data['messages'][1]['content'] += '\n#### ' 
     if(answer_clean):
         data['messages'][1]['content'] += answer_clean
         count+=1
