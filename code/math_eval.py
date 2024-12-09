@@ -107,7 +107,7 @@ def _clean_numbers(string):
     return new_string
 
 
-json_file_path = 'code\\results_lora.json'
+json_file_path = 'code\\results.json'
 with open(json_file_path, 'r', encoding="utf-8") as json_file:
     datas = json.load(json_file)  # 直接解析整个数组
 import math_equivalence
