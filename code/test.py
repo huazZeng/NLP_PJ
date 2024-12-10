@@ -21,16 +21,18 @@ import os
 # output_jsonl = 'MATH_train.jsonl'     # 输出 JSONL 文件路径
 # merge_json_to_jsonl(input_directory, output_jsonl)
 
-
+import re
 import json
-
+import random
 # 读取原始数据
-json_file_path = 'MATH_train.jsonl'
+json_file_path = './AugGSM8K_part1/AugGSM8K_part1.jsonl'
 with open(json_file_path, 'r', encoding="utf-8") as json_file:
     data = [json.loads(line) for line in json_file]
-
+json_file_path = '.\AugGSM8K_part2\AugGSM8K_part2.jsonl'
+with open(json_file_path, 'r', encoding="utf-8") as json_file:
+    data.extend([json.loads(line) for line in json_file]) 
 # 将数据格式化为 JSONL 格式，每个问题和答案作为一个消息对象
-output_file_path = 'MATH_train_fineture.jsonl'
+output_file_path = 'gsm8k_argu.jsonl'
 
 prompt = '''You are a highly skilled mathematician capable of solving complex grade-school math problems step by step. Please read the problem carefully and solve it with clear reasoning. Follow these instructions:
 
@@ -41,23 +43,42 @@ prompt = '''You are a highly skilled mathematician capable of solving complex gr
 
 Output your response in the following format:
 [Explanation and calculations]
-#### [Final numerical answer]   
+#### $[Final numerical answer]$ 
 
 Here is the problem:
 '''
+
+count = 0 
+matchcount = 0
 with open(output_file_path, 'w', encoding="utf-8") as output_file:
     for item in data:
-        message = {
-            "role": "user",
-            "content": prompt+ item["problem"]
-        }
-        assistant_message = {
-            "role": "assistant",
-            "content": item["solution"]
-        }
-        # 写入每个问题和答案对
-        formatted_entry = {"messages": [message, assistant_message]}
-        output_file.write(json.dumps(formatted_entry, ensure_ascii=False) + '\n')
+        # 随机抽取，10%的概率
+        if random.random() < 0.12:  # 生成一个 0 到 1 之间的浮动数，如果小于 0.1，则抽取
+            
+           
+            ANS_RE = re.compile(r"The answer is: \$(\-?[0-9\.,]+)\$")
 
-    
-                        
+            def remove_matched_content(text):
+                # 使用 re.sub 将匹配的内容替换为空字符串
+                return ANS_RE.sub("", text)
+            match = ANS_RE.search(item["response"]) 
+            item["response"] = remove_matched_content(item["response"])
+            
+            if match :
+                matchcount += 1 
+                match_str = match.group(1).strip()
+                match_str = match_str.replace(",", "")
+                count += 1 
+                message = {
+                    "role": "user",
+                    "content": prompt + item["query"]
+                }
+                assistant_message = {
+                    "role": "assistant",
+                    "content": item["response"]+"\n"+"#### "+match_str
+                }
+                # 写入每个问题和答案对
+                formatted_entry = {"messages": [message, assistant_message]}
+                output_file.write(json.dumps(formatted_entry, ensure_ascii=False) + '\n')
+
+     
