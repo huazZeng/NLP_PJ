@@ -25,16 +25,16 @@ import re
 import json
 import random
 # 读取原始数据
-json_file_path = './AugGSM8K_part1/AugGSM8K_part1.jsonl'
+json_file_path = './AugMATH_part1/AugMATH_part1.jsonl'
 with open(json_file_path, 'r', encoding="utf-8") as json_file:
     data = [json.loads(line) for line in json_file]
-json_file_path = '.\AugGSM8K_part2\AugGSM8K_part2.jsonl'
+json_file_path = '.\AugMATH_part2\AugMATH_part2.jsonl'
 with open(json_file_path, 'r', encoding="utf-8") as json_file:
     data.extend([json.loads(line) for line in json_file]) 
 # 将数据格式化为 JSONL 格式，每个问题和答案作为一个消息对象
-output_file_path = 'gsm8k_argu.jsonl'
+output_file_path = 'math_argu.jsonl'
 
-prompt = '''You are a highly skilled mathematician capable of solving complex grade-school math problems step by step. Please read the problem carefully and solve it with clear reasoning. Follow these instructions:
+prompt = '''You are a highly skilled mathematician capable of solving complex  math problems step by step. Please read the problem carefully and solve it with clear reasoning. Follow these instructions:
 
 - Identify the known information and the question being asked.
 - Break the solution into logical steps, providing clear explanations for each.
