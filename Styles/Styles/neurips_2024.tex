@@ -1,6 +1,6 @@
 \documentclass{article}
 
-
+\usepackage{float}
 % if you need to pass options to natbib, use, e.g.:
 %     \PassOptionsToPackage{numbers, compress}{natbib}
 % before loading neurips_2024
@@ -91,11 +91,22 @@
 
 \author{
     Huazheng~Zeng\\
-    Department of Computer Science \\
-    Cranberry-Lemon University \\
-    Pittsburgh, PA 15213 \\
-    \texttt{hippo@cs.cranberry-lemon.edu} \\
-    % \AND
+    School of Computer Science and Technology \\
+    Fudan University \\
+    220 Handan Rd, Shanghai, 200433 \\
+    \texttt{22302010022@m.fudan.edu} \\
+    \AND
+    Yang~Wang\\
+    School of Computer Science and Technology \\
+    Fudan University \\
+    220 Handan Rd, Shanghai, 200433 \\
+    \texttt{223020100@m.fudan.edu} \\
+    \AND
+    Yuxuan~Xie\\
+    School of Computer Science and Technology \\
+    Fudan University \\
+    220 Handan Rd, Shanghai, 200433 \\
+    \texttt{223020100@m.fudan.edu} \\
     % Coauthor Name \\
     % Department of Mathematics \\
     % Lemonberry University \\
@@ -126,14 +137,12 @@
 
 \section{Introduction}
 
+数学推理是评估人类智力的核心任务之一。随着大规模语言模型（LLMs）的不断发展，基于自然语言处理的数学推理任务已成为一个重要的研究领域。尽管传统的数学推理方法依赖于符号计算和规则推导，近年来，深度学习，尤其是大型语言模型，已经在自动推理方面取得了显著的进展。
 
+本研究基于Qwen2.5-0.5B-instruction模型，探讨了指令微调（instruction fine-tuning）方法在数学推理任务中的应用，重点研究了全参数微调（SFT）和LoRA微调两种技术的效果。此外，我们还结合了数据增强策略，通过DeepSeek API扩展训练数据集，以提升模型在复杂数学推理任务中的表现。为进一步增强模型的推理能力，我们在解码阶段引入了多轮投票机制，旨在通过集成多次推理结果来提高推理的稳定性和准确性。
 
+本文的主要贡献包括：提出了Qwen2.5模型在数学推理任务中的应用，探索了不同微调技术的效果，并评估了数据增强和投票机制在该任务中的有效性。
 
-\subsection{Style}
-
-
-
-\subsection{Retrieval of style files}
 
 
 
@@ -147,31 +156,133 @@
 \section{Method}
 
 
+\par 在本研究中，我们采用了多种方法来提升Qwen系列模型在数学推理任务上的表现。
+我们的方法结合了以下主要技术：
+\begin{itemize}
+    \item 全参数微调，增强模型在特定任务上的适应能力；
+    \item LoRA微调，优化计算资源效率的同时能取得较好的性能；
+    \item 使用DeepSeek在原有数据集上生成回答以对其进行扩充；
+    \item 多数投票推理机制，以期望提升推理过程的稳健性；
+    \item 数据增强策略，进一步提升模型的泛化能力。
+\end{itemize}
+ 
+\subsection{全参数微调}
+全参数微调对模型的全部参数进行优化，以提升模型在特定任务(如数学推理任务)上的适应能力：
+$$
+\mathcal{L}_{\text{full}} = \frac{1}{N} \sum_{i=1}^N \ell(f(X_i; \Theta), y_i)
+$$
+其中，$X_i$表示输入问题，$y_i$表示期望输出，$\Theta$为模型的全部参数。
 
-\subsection{Headings: second level}
+\subsection{LoRA 微调}
+为减少全参数微调带来的计算成本，同时降低其灾难性遗忘风险，以提高模型对新任务的迁移能力，我们采用了LoRA技术进行微调。
+该技术在微调过程中固定大部分预训练参数，仅更新小规模的适配器矩阵：
+$$
+\Theta' = \Theta + A \cdot B
+$$
+假设$\Theta \in \mathbb{R}^{d \times k}$，则$A \in \mathbb{R}^{d \times r}$、$B \in \mathbb{R}^{r \times k}$，且$r \ll min(d, k)$。
+
+\subsection{DeepSeek 生成训练数据}
+DeepSeek是一个较为强大的大语言模型，其在数学推理方面的能力也较为出色。故我们尝试调用DeepSeek api对
+GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的回答能够包含较为详细的解答步骤，故我们期望
+通过这种类似蒸馏的过程来指导Qwen2.5B提升数学推理方面的能力。
+
+\subsection{多数投票推理机制}
+在推理阶段，我们通过多数投票机制以期增强模型推理的鲁班性。
+假设模型的正确率为$p$，在多数投票推理阶段生成$r$次回答，则期望的正确回答数量为$p \times r$。
+若考虑最佳情况，其余错误回答均不一致，那么希望从该机制中获得正确回答，则需要$p \times r \ge 2$，即$p \ge \frac{2}{r}$。
+但在实际测试中，该方法反而降低了模型的准确性，这可能是由于模型生成的回答与最佳情况的假设不符，生成了相同的错误答案。
+
+\subsection{数据增强}
+由于数据在模型微调中占有较为重要的作用，所以我们采用了《MuggleMath: Assessing the Impact of Query and Response Augmentation on Math Reasoning》
+一文中提供的AugGSM8K和AugMATH数据集对模型进行微调，并对其进行过滤以保留高质量训练数据，以此让模型更好地学习数学推理能力，
+并取得了较好的效果。
 
 
-Second-level headings should be in 10-point type.
-
-
-\subsubsection{Headings: third level}
-
-
-Third-level headings should be in 10-point type.
-
-
-\paragraph{Paragraphs}
-
-
-There is also a \verb+\paragraph+ command available, which sets the heading in
-bold, flush left, and inline with the text, with the heading followed by 1\,em
-of space.
 
 
 \section{Evaluation}
 
+\subsection{基于SFT与LoRA的微调比对}
+在本部分中，我们比较了全参数微调（SFT）和LoRA微调的效果。我们基于Qwen2-0.5B模型对SFT和LoRA两种微调方法进行了测试，并对比了显存占用、训练时间和训练效果。实验结果如下表所示：
 
-\subsection{Tables}
+\begin{table}[ht]
+    \caption{基于GSM8K数据集的SFT与LoRA微调对比}
+    \label{comparison-table}
+    \centering
+    \begin{tabular}{|c|c|c|}
+      \hline
+      \textbf{指标} & \textbf{SFT} & \textbf{LoRA} \\ \hline
+      显存占用 & 较高 & 较低 \\ \hline
+      训练时间 & 较长 & 较短 \\ \hline
+      训练效果 & 较好（在大规模任务中） & 较好（在小规模任务中，适应性强） \\ \hline
+    \end{tabular}
+\end{table}
+
+\textbf{分析：}
+全参数微调（SFT）在训练大规模任务时效果较好，但由于需要更新模型的所有参数，其显存占用较高且训练时间较长。相比之下，LoRA微调仅更新少部分适配器矩阵，显著降低了显存占用和训练时间，同时在小规模任务中表现优异，且能够较好地适应不同任务。
+
+\subsection{基于增强数据集训练与正常训练的微调比对}
+在这部分实验中，我们对比了基于增强数据集训练和正常训练的微调效果。我们通过DeepSeek生成的扩充数据集以及AugGSM8K和AugMATH数据集进行了微调，并评估了训练效果。
+
+\begin{table}[H]
+  \caption{基于增强数据集训练与正常训练的微调比对}
+  \label{augmentation-comparison-table}
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{指标} & \textbf{正常训练} & \textbf{增强数据集训练} \\ \hline
+    显存占用 & 较低 & 较低 \\ \hline
+    训练时间 & 较短 & 较长 \\ \hline
+    训练效果 & 较好（在常规数据上） & 较好（在数据多样性和鲁棒性上） \\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{分析：}
+增强数据集的使用能够显著提升模型在数据多样性和鲁棒性上的表现。尽管增强数据集训练的时间较长，但其在训练效果上超越了常规训练，尤其是在数学推理等复杂任务中，增强数据集对提升模型的泛化能力具有显著作用。
+
+\subsubsection{DeepSeek生成的数据集}
+我们使用DeepSeek生成的回答来扩充GSM8K和MATH训练集。DeepSeek能够生成带有详细解答步骤的回答，这种类似蒸馏的过程帮助Qwen2.5B模型提升了数学推理方面的能力。经过扩充数据集的训练后，Qwen2.5B模型在数学推理任务上获得了较好的效果。
+
+\subsection{Scaling Law的验证}
+为了验证模型性能随模型规模增长的趋势，我们对比了0.5B与3B模型的表现。实验结果显示，随着模型规模的增加，训练效果得到了提升，但相应的训练时间和显存占用也显著增加。
+
+\begin{table}[H]
+    \caption{Scaling Law的验证（0.5B与3B模型对比）}
+    \label{scaling-law-comparison}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{指标} & \textbf{0.5B模型} & \textbf{3B模型} \\ \hline
+        显存占用 & 较低 & 较高 \\ \hline
+        训练时间 & 较短 & 较长 \\ \hline
+        训练效果 & 较好（在小规模任务中） & 较好（在大规模任务中） \\ \hline
+    \end{tabular}
+\end{table}
+
+\textbf{分析：}
+通过Scaling Law的验证，我们观察到更大的模型（如3B模型）在大规模任务中表现出了更好的训练效果。然而，随着模型规模的增加，显存占用和训练时间也相应增加，限制了模型的实际应用。因此，在选择模型规模时，需要权衡效果和资源消耗。
+
+\subsection{多轮投票机制的比对}
+在多轮投票机制中，我们期望通过生成多个回答并进行投票来提升推理的鲁棒性。实验结果表明，多轮投票机制并未显著提升模型的准确性。反而，由于生成的回答存在重复的错误答案，投票机制的效果不如预期。
+
+\begin{table}[H]
+  \caption{多轮投票机制的比对（有无）}
+  \label{voting-mechanism-comparison}
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{指标} & \textbf{有多轮投票机制} & \textbf{无多轮投票机制} \\ \hline
+    显存占用 & 较高（需要存储多个投票结果） & 较低 \\ \hline
+    训练时间 & 较长（多轮投票需要更多计算） & 较短 \\ \hline
+    训练效果 & 略微提升（但效果不明显） & 较差（可能会受到单次预测的影响） \\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{分析：}
+尽管多轮投票机制理论上可以提高鲁棒性，但在实际实验中，该机制未能显著提升模型的准确性。我们认为，这可能是因为多个投票生成的答案存在重复的错误，从而影响了整体效果。此外，多轮投票增加了显存占用和计算开销，未能带来足够的性能提升。
+
+
+  
 
 
 
@@ -180,18 +291,16 @@ of space.
 
 \section{Conclusion}
 
+本研究探索了多种方法提升Qwen系列模型在数学推理任务上的表现。实验结果表明，基于全参数微调（SFT）和LoRA微调的模型在数学推理任务中表现出色，尤其是在特定任务下，通过优化计算资源能够显著提升模型的推理能力。同时，数据增强策略有效提升了模型在复杂任务中的泛化能力，尤其是在基于DeepSeek生成的扩充数据集进行训练后，模型的数学推理能力得到了明显提升。
+
+然而，实验结果也表明，多轮投票机制在提高推理精度方面的效果并不显著，可能是由于生成的多个答案存在重复的错误。因此，在模型推理过程中的策略选择仍需进一步优化。此外，随着模型规模的增加，显存占用和训练时间也呈现上升趋势，如何在性能和资源消耗之间找到最佳平衡仍然是一个值得关注的研究方向。
+
+未来的研究可以从以下几个方面进行拓展：进一步优化微调策略，探索不同类型的数据增强方法，提升多轮投票机制的鲁棒性，探索如何结合符号推理与深度学习模型来增强数学推理能力，以及多步骤的微调。
+
 
 
 
 \section{References}
-
-
-References follow the acknowledgments in the camera-ready paper. Use unnumbered first-level heading for
-the references. Any choice of citation style is acceptable as long as you are
-consistent. It is permissible to reduce the font size to \verb+small+ (9 point)
-when listing the references.
-Note that the Reference section does not count towards the page limit.
-\medskip
 
 
 {
@@ -215,221 +324,5 @@ hippocampal region CA3. {\it Journal of Neuroscience} {\bf 15}(7):5249-5262.
 }
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newpage
-\section*{NeurIPS Paper Checklist}
-
-\begin{enumerate}
-
-  \item {\bf Claims}
-      \item[] Question: Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the abstract and introduction do not include the claims made in the paper.
-          \item The abstract and/or introduction should clearly state the claims made, including the contributions made in the paper and important assumptions and limitations. A No or NA answer to this question will not be perceived well by the reviewers. 
-          \item The claims made should match theoretical and experimental results, and reflect how much the results can be expected to generalize to other settings. 
-          \item It is fine to include aspirational goals as motivation as long as it is clear that these goals are not attained by the paper. 
-      \end{itemize}
-  
-  \item {\bf Limitations}
-      \item[] Question: Does the paper discuss the limitations of the work performed by the authors?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper has no limitation while the answer No means that the paper has limitations, but those are not discussed in the paper. 
-          \item The authors are encouraged to create a separate "Limitations" section in their paper.
-          \item The paper should point out any strong assumptions and how robust the results are to violations of these assumptions (e.g., independence assumptions, noiseless settings, model well-specification, asymptotic approximations only holding locally). The authors should reflect on how these assumptions might be violated in practice and what the implications would be.
-          \item The authors should reflect on the scope of the claims made, e.g., if the approach was only tested on a few datasets or with a few runs. In general, empirical results often depend on implicit assumptions, which should be articulated.
-          \item The authors should reflect on the factors that influence the performance of the approach. For example, a facial recognition algorithm may perform poorly when image resolution is low or images are taken in low lighting. Or a speech-to-text system might not be used reliably to provide closed captions for online lectures because it fails to handle technical jargon.
-          \item The authors should discuss the computational efficiency of the proposed algorithms and how they scale with dataset size.
-          \item If applicable, the authors should discuss possible limitations of their approach to address problems of privacy and fairness.
-          \item While the authors might fear that complete honesty about limitations might be used by reviewers as grounds for rejection, a worse outcome might be that reviewers discover limitations that aren't acknowledged in the paper. The authors should use their best judgment and recognize that individual actions in favor of transparency play an important role in developing norms that preserve the integrity of the community. Reviewers will be specifically instructed to not penalize honesty concerning limitations.
-      \end{itemize}
-  
-  \item {\bf Theory Assumptions and Proofs}
-      \item[] Question: For each theoretical result, does the paper provide the full set of assumptions and a complete (and correct) proof?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper does not include theoretical results. 
-          \item All the theorems, formulas, and proofs in the paper should be numbered and cross-referenced.
-          \item All assumptions should be clearly stated or referenced in the statement of any theorems.
-          \item The proofs can either appear in the main paper or the supplemental material, but if they appear in the supplemental material, the authors are encouraged to provide a short proof sketch to provide intuition. 
-          \item Inversely, any informal proof provided in the core of the paper should be complemented by formal proofs provided in appendix or supplemental material.
-          \item Theorems and Lemmas that the proof relies upon should be properly referenced. 
-      \end{itemize}
-  
-      \item {\bf Experimental Result Reproducibility}
-      \item[] Question: Does the paper fully disclose all the information needed to reproduce the main experimental results of the paper to the extent that it affects the main claims and/or conclusions of the paper (regardless of whether the code and data are provided or not)?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper does not include experiments.
-          \item If the paper includes experiments, a No answer to this question will not be perceived well by the reviewers: Making the paper reproducible is important, regardless of whether the code and data are provided or not.
-          \item If the contribution is a dataset and/or model, the authors should describe the steps taken to make their results reproducible or verifiable. 
-          \item Depending on the contribution, reproducibility can be accomplished in various ways. For example, if the contribution is a novel architecture, describing the architecture fully might suffice, or if the contribution is a specific model and empirical evaluation, it may be necessary to either make it possible for others to replicate the model with the same dataset, or provide access to the model. In general. releasing code and data is often one good way to accomplish this, but reproducibility can also be provided via detailed instructions for how to replicate the results, access to a hosted model (e.g., in the case of a large language model), releasing of a model checkpoint, or other means that are appropriate to the research performed.
-          \item While NeurIPS does not require releasing code, the conference does require all submissions to provide some reasonable avenue for reproducibility, which may depend on the nature of the contribution. For example
-          \begin{enumerate}
-              \item If the contribution is primarily a new algorithm, the paper should make it clear how to reproduce that algorithm.
-              \item If the contribution is primarily a new model architecture, the paper should describe the architecture clearly and fully.
-              \item If the contribution is a new model (e.g., a large language model), then there should either be a way to access this model for reproducing the results or a way to reproduce the model (e.g., with an open-source dataset or instructions for how to construct the dataset).
-              \item We recognize that reproducibility may be tricky in some cases, in which case authors are welcome to describe the particular way they provide for reproducibility. In the case of closed-source models, it may be that access to the model is limited in some way (e.g., to registered users), but it should be possible for other researchers to have some path to reproducing or verifying the results.
-          \end{enumerate}
-      \end{itemize}
-  
-  
-  \item {\bf Open access to data and code}
-      \item[] Question: Does the paper provide open access to the data and code, with sufficient instructions to faithfully reproduce the main experimental results, as described in supplemental material?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that paper does not include experiments requiring code.
-          \item Please see the NeurIPS code and data submission guidelines (\url{https://nips.cc/public/guides/CodeSubmissionPolicy}) for more details.
-          \item While we encourage the release of code and data, we understand that this might not be possible, so “No” is an acceptable answer. Papers cannot be rejected simply for not including code, unless this is central to the contribution (e.g., for a new open-source benchmark).
-          \item The instructions should contain the exact command and environment needed to run to reproduce the results. See the NeurIPS code and data submission guidelines (\url{https://nips.cc/public/guides/CodeSubmissionPolicy}) for more details.
-          \item The authors should provide instructions on data access and preparation, including how to access the raw data, preprocessed data, intermediate data, and generated data, etc.
-          \item The authors should provide scripts to reproduce all experimental results for the new proposed method and baselines. If only a subset of experiments are reproducible, they should state which ones are omitted from the script and why.
-          \item At submission time, to preserve anonymity, the authors should release anonymized versions (if applicable).
-          \item Providing as much information as possible in supplemental material (appended to the paper) is recommended, but including URLs to data and code is permitted.
-      \end{itemize}
-  
-  
-  \item {\bf Experimental Setting/Details}
-      \item[] Question: Does the paper specify all the training and test details (e.g., data splits, hyperparameters, how they were chosen, type of optimizer, etc.) necessary to understand the results?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper does not include experiments.
-          \item The experimental setting should be presented in the core of the paper to a level of detail that is necessary to appreciate the results and make sense of them.
-          \item The full details can be provided either with the code, in appendix, or as supplemental material.
-      \end{itemize}
-  
-  \item {\bf Experiment Statistical Significance}
-      \item[] Question: Does the paper report error bars suitably and correctly defined or other appropriate information about the statistical significance of the experiments?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper does not include experiments.
-          \item The authors should answer "Yes" if the results are accompanied by error bars, confidence intervals, or statistical significance tests, at least for the experiments that support the main claims of the paper.
-          \item The factors of variability that the error bars are capturing should be clearly stated (for example, train/test split, initialization, random drawing of some parameter, or overall run with given experimental conditions).
-          \item The method for calculating the error bars should be explained (closed form formula, call to a library function, bootstrap, etc.)
-          \item The assumptions made should be given (e.g., Normally distributed errors).
-          \item It should be clear whether the error bar is the standard deviation or the standard error of the mean.
-          \item It is OK to report 1-sigma error bars, but one should state it. The authors should preferably report a 2-sigma error bar than state that they have a 96\% CI, if the hypothesis of Normality of errors is not verified.
-          \item For asymmetric distributions, the authors should be careful not to show in tables or figures symmetric error bars that would yield results that are out of range (e.g. negative error rates).
-          \item If error bars are reported in tables or plots, The authors should explain in the text how they were calculated and reference the corresponding figures or tables in the text.
-      \end{itemize}
-  
-  \item {\bf Experiments Compute Resources}
-      \item[] Question: For each experiment, does the paper provide sufficient information on the computer resources (type of compute workers, memory, time of execution) needed to reproduce the experiments?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper does not include experiments.
-          \item The paper should indicate the type of compute workers CPU or GPU, internal cluster, or cloud provider, including relevant memory and storage.
-          \item The paper should provide the amount of compute required for each of the individual experimental runs as well as estimate the total compute. 
-          \item The paper should disclose whether the full research project required more compute than the experiments reported in the paper (e.g., preliminary or failed experiments that didn't make it into the paper). 
-      \end{itemize}
-      
-  \item {\bf Code Of Ethics}
-      \item[] Question: Does the research conducted in the paper conform, in every respect, with the NeurIPS Code of Ethics \url{https://neurips.cc/public/EthicsGuidelines}?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the authors have not reviewed the NeurIPS Code of Ethics.
-          \item If the authors answer No, they should explain the special circumstances that require a deviation from the Code of Ethics.
-          \item The authors should make sure to preserve anonymity (e.g., if there is a special consideration due to laws or regulations in their jurisdiction).
-      \end{itemize}
-  
-  
-  \item {\bf Broader Impacts}
-      \item[] Question: Does the paper discuss both potential positive societal impacts and negative societal impacts of the work performed?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that there is no societal impact of the work performed.
-          \item If the authors answer NA or No, they should explain why their work has no societal impact or why the paper does not address societal impact.
-          \item Examples of negative societal impacts include potential malicious or unintended uses (e.g., disinformation, generating fake profiles, surveillance), fairness considerations (e.g., deployment of technologies that could make decisions that unfairly impact specific groups), privacy considerations, and security considerations.
-          \item The conference expects that many papers will be foundational research and not tied to particular applications, let alone deployments. However, if there is a direct path to any negative applications, the authors should point it out. For example, it is legitimate to point out that an improvement in the quality of generative models could be used to generate deepfakes for disinformation. On the other hand, it is not needed to point out that a generic algorithm for optimizing neural networks could enable people to train models that generate Deepfakes faster.
-          \item The authors should consider possible harms that could arise when the technology is being used as intended and functioning correctly, harms that could arise when the technology is being used as intended but gives incorrect results, and harms following from (intentional or unintentional) misuse of the technology.
-          \item If there are negative societal impacts, the authors could also discuss possible mitigation strategies (e.g., gated release of models, providing defenses in addition to attacks, mechanisms for monitoring misuse, mechanisms to monitor how a system learns from feedback over time, improving the efficiency and accessibility of ML).
-      \end{itemize}
-      
-  \item {\bf Safeguards}
-      \item[] Question: Does the paper describe safeguards that have been put in place for responsible release of data or models that have a high risk for misuse (e.g., pretrained language models, image generators, or scraped datasets)?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper poses no such risks.
-          \item Released models that have a high risk for misuse or dual-use should be released with necessary safeguards to allow for controlled use of the model, for example by requiring that users adhere to usage guidelines or restrictions to access the model or implementing safety filters. 
-          \item Datasets that have been scraped from the Internet could pose safety risks. The authors should describe how they avoided releasing unsafe images.
-          \item We recognize that providing effective safeguards is challenging, and many papers do not require this, but we encourage authors to take this into account and make a best faith effort.
-      \end{itemize}
-  
-  \item {\bf Licenses for existing assets}
-      \item[] Question: Are the creators or original owners of assets (e.g., code, data, models), used in the paper, properly credited and are the license and terms of use explicitly mentioned and properly respected?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper does not use existing assets.
-          \item The authors should cite the original paper that produced the code package or dataset.
-          \item The authors should state which version of the asset is used and, if possible, include a URL.
-          \item The name of the license (e.g., CC-BY 4.0) should be included for each asset.
-          \item For scraped data from a particular source (e.g., website), the copyright and terms of service of that source should be provided.
-          \item If assets are released, the license, copyright information, and terms of use in the package should be provided. For popular datasets, \url{paperswithcode.com/datasets} has curated licenses for some datasets. Their licensing guide can help determine the license of a dataset.
-          \item For existing datasets that are re-packaged, both the original license and the license of the derived asset (if it has changed) should be provided.
-          \item If this information is not available online, the authors are encouraged to reach out to the asset's creators.
-      \end{itemize}
-  
-  \item {\bf New Assets}
-      \item[] Question: Are new assets introduced in the paper well documented and is the documentation provided alongside the assets?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper does not release new assets.
-          \item Researchers should communicate the details of the dataset/code/model as part of their submissions via structured templates. This includes details about training, license, limitations, etc. 
-          \item The paper should discuss whether and how consent was obtained from people whose asset is used.
-          \item At submission time, remember to anonymize your assets (if applicable). You can either create an anonymized URL or include an anonymized zip file.
-      \end{itemize}
-  
-  \item {\bf Crowdsourcing and Research with Human Subjects}
-      \item[] Question: For crowdsourcing experiments and research with human subjects, does the paper include the full text of instructions given to participants and screenshots, if applicable, as well as details about compensation (if any)? 
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper does not involve crowdsourcing nor research with human subjects.
-          \item Including this information in the supplemental material is fine, but if the main contribution of the paper involves human subjects, then as much detail as possible should be included in the main paper. 
-          \item According to the NeurIPS Code of Ethics, workers involved in data collection, curation, or other labor should be paid at least the minimum wage in the country of the data collector. 
-      \end{itemize}
-  
-  \item {\bf Institutional Review Board (IRB) Approvals or Equivalent for Research with Human Subjects}
-      \item[] Question: Does the paper describe potential risks incurred by study participants, whether such risks were disclosed to the subjects, and whether Institutional Review Board (IRB) approvals (or an equivalent approval/review based on the requirements of your country or institution) were obtained?
-      \item[] Answer: \answerTODO{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-      \item[] Justification: \justificationTODO{}
-      \item[] Guidelines:
-      \begin{itemize}
-          \item The answer NA means that the paper does not involve crowdsourcing nor research with human subjects.
-          \item Depending on the country in which research is conducted, IRB approval (or equivalent) may be required for any human subjects research. If you obtained IRB approval, you should clearly state this in the paper. 
-          \item We recognize that the procedures for this may vary significantly between institutions and locations, and we expect authors to adhere to the NeurIPS Code of Ethics and the guidelines for their institution. 
-          \item For initial submissions, do not include any information that would break anonymity (if applicable), such as the institution conducting the review.
-      \end{itemize}
-  
-  \end{enumerate}
 \end{document}
