@@ -4,8 +4,8 @@ plt.rcParams['font.sans-serif'] = ['SimHei']  # 使用黑体
 plt.rcParams['axes.unicode_minus'] = False  # 正常显示负号
 # 数据准备
 labels = ['准确度 (%)', '训练时间 (s)', '显存占用 (GB)']
-model_3B = [27.75, 1054.17, 16]  # 假设的3B模型数据
-model_0_5B = [25.55, 1393.15, 8]  # 假设的0.5B模型数据
+model_3B = [73.63, 4742.59, 51.57]  # 假设的3B模型数据
+model_0_5B = [42.99, 2438.16, 19.16]  # 假设的0.5B模型数据
 
 x = np.arange(len(labels))  # 标签位置
 width = 0.35  # 条形宽度
