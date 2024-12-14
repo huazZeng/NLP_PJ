@@ -1,5 +1,5 @@
 \documentclass{article}
-
+\usepackage{graphicx} % 用于插入图片
 \usepackage{float}
 % if you need to pass options to natbib, use, e.g.:
 %     \PassOptionsToPackage{numbers, compress}{natbib}
@@ -184,11 +184,11 @@ LGDA 通过逻辑规则生成增强样本的策略激发了我们在领域特定
 \par 在本研究中，我们采用了多种方法来提升Qwen系列模型在数学推理任务上的表现。
 我们的方法结合了以下主要技术：
 \begin{itemize}
-    \item 全参数微调，增强模型在特定任务上的适应能力；
-    \item LoRA微调，优化计算资源效率的同时能取得较好的性能；
-    \item 使用DeepSeek在原有数据集上生成回答以对其进行扩充；
-    \item 多数投票推理机制，以期望提升推理过程的稳健性；
-    \item 数据增强策略，进一步提升模型的泛化能力。
+    \item1 全参数微调，增强模型在特定任务上的适应能力；
+    \item2 LoRA微调，优化计算资源效率的同时能取得较好的性能；
+    \item3 使用DeepSeek在原有数据集上生成回答以对其进行扩充；
+    \item4 多数投票推理机制，以期望提升推理过程的稳健性；
+    \item5 数据增强策略，进一步提升模型的泛化能力。
 \end{itemize}
  
 \subsection{全参数微调}
@@ -230,81 +230,145 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 \subsection{基于SFT与LoRA的微调比对}
 在本部分中，我们比较了全参数微调（SFT）和LoRA微调的效果。我们基于Qwen2-0.5B模型对SFT和LoRA两种微调方法进行了测试，并对比了显存占用、训练时间和训练效果。实验结果如下表所示：
 
-\begin{table}[ht]
-    \caption{基于GSM8K数据集的SFT与LoRA微调对比}
-    \label{comparison-table}
-    \centering
-    \begin{tabular}{|c|c|c|}
-      \hline
-      \textbf{指标} & \textbf{SFT} & \textbf{LoRA} \\ \hline
-      显存占用 & 较高 & 较低 \\ \hline
-      训练时间 & 较长 & 较短 \\ \hline
-      训练效果 & 较好（在大规模任务中） & 较好（在小规模任务中，适应性强） \\ \hline
-    \end{tabular}
-\end{table}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{GSM8K-LORA.png} % 插入图片
+  \caption{基于GSM8K数据集的SFT与LoRA微调对比} % 图注
+  \label{fig:my_label0} % 标签
+\end{figure}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{MATH-LORA.png} % 插入图片
+  \caption{基于MATH数据集的SFT与LoRA微调对比} % 图注
+  \label{fig:my_label3} % 标签
+\end{figure}
 
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.5\textwidth]{MATH-LORA.png} % 插入图片
+%   \caption{基于GSM8K数据集的SFT与LoRA微调对比} % 图注
+%   \label{fig:my_label} % 标签
+% \end{figure}
+% \begin{table}[H]
+%   \caption{}
+%   \label{comparison-math-table}
+%   \centering
+%   \begin{tabular}{|c|c|c|}
+%     \hline
+%     \textbf{指标} & \textbf{SFT} & \textbf{LoRA} \\ \hline
+%     显存占用 & 21.60GiB & 7.90GiB \\ \hline
+%     训练时间 & 839.47s  & 1025.39s\\ \hline
+%     训练效果 & 9.80\% &  8.00\%\\ \hline
+%   \end{tabular}
+% \end{table}
 \textbf{分析：}
 全参数微调（SFT）在训练大规模任务时效果较好，但由于需要更新模型的所有参数，其显存占用较高且训练时间较长。相比之下，LoRA微调仅更新少部分适配器矩阵，显著降低了显存占用和训练时间，同时在小规模任务中表现优异，且能够较好地适应不同任务。
 
 \subsection{基于增强数据集训练与正常训练的微调比对}
 在这部分实验中，我们对比了基于增强数据集训练和正常训练的微调效果。我们通过DeepSeek生成的扩充数据集以及AugGSM8K和AugMATH数据集进行了微调，并评估了训练效果。
+\subsubsection{基于MuggleMath的数据增强训练}
+我们基于MuggleMath数据，通过正则匹配消去重复数据，并且按一定概率采样，最后提取出两个个1.5k条的数据集AguGSM8K和AguMATH数据集，用于对比微调效果:
 
 \begin{table}[H]
-  \caption{基于增强数据集训练与正常训练的微调比对}
-  \label{augmentation-comparison-table}
+  \caption{基于AguGSM8K训练与正常训练的微调比对}
+  \label{gsm8k-augmentation-comparison-table}
   \centering
   \begin{tabular}{|c|c|c|}
     \hline
     \textbf{指标} & \textbf{正常训练} & \textbf{增强数据集训练} \\ \hline
-    显存占用 & 较低 & 较低 \\ \hline
-    训练时间 & 较短 & 较长 \\ \hline
-    训练效果 & 较好（在常规数据上） & 较好（在数据多样性和鲁棒性上） \\ \hline
+    训练时间 & 1054.17s & 2438.16s \\ \hline
+    训练效果 & 27.75\% & 42.99\% \\ \hline
   \end{tabular}
 \end{table}
 
-\textbf{分析：}
-增强数据集的使用能够显著提升模型在数据多样性和鲁棒性上的表现。尽管增强数据集训练的时间较长，但其在训练效果上超越了常规训练，尤其是在数学推理等复杂任务中，增强数据集对提升模型的泛化能力具有显著作用。
-
-\subsubsection{DeepSeek生成的数据集}
-我们使用DeepSeek生成的回答来扩充GSM8K和MATH训练集。DeepSeek能够生成带有详细解答步骤的回答，这种类似蒸馏的过程帮助Qwen2.5B模型提升了数学推理方面的能力。经过扩充数据集的训练后，Qwen2.5B模型在数学推理任务上获得了较好的效果。
-
-\subsection{Scaling Law的验证}
-为了验证模型性能随模型规模增长的趋势，我们对比了0.5B与3B模型的表现。实验结果显示，随着模型规模的增加，训练效果得到了提升，但相应的训练时间和显存占用也显著增加。
 
 \begin{table}[H]
-    \caption{Scaling Law的验证（0.5B与3B模型对比）}
-    \label{scaling-law-comparison}
-    \centering
-    \begin{tabular}{|c|c|c|}
-        \hline
-        \textbf{指标} & \textbf{0.5B模型} & \textbf{3B模型} \\ \hline
-        显存占用 & 较低 & 较高 \\ \hline
-        训练时间 & 较短 & 较长 \\ \hline
-        训练效果 & 较好（在小规模任务中） & 较好（在大规模任务中） \\ \hline
-    \end{tabular}
-\end{table}
-
-\textbf{分析：}
-通过Scaling Law的验证，我们观察到更大的模型（如3B模型）在大规模任务中表现出了更好的训练效果。然而，随着模型规模的增加，显存占用和训练时间也相应增加，限制了模型的实际应用。因此，在选择模型规模时，需要权衡效果和资源消耗。
-
-\subsection{多轮投票机制的比对}
-在多轮投票机制中，我们期望通过生成多个回答并进行投票来提升推理的鲁棒性。实验结果表明，多轮投票机制并未显著提升模型的准确性。反而，由于生成的回答存在重复的错误答案，投票机制的效果不如预期。
-
-\begin{table}[H]
-  \caption{多轮投票机制的比对（有无）}
-  \label{voting-mechanism-comparison}
+  \caption{基于AguMATH增强数据集训练与正常训练的微调比对}
+  \label{math-augmentation-comparison-table}
   \centering
   \begin{tabular}{|c|c|c|}
     \hline
-    \textbf{指标} & \textbf{有多轮投票机制} & \textbf{无多轮投票机制} \\ \hline
-    显存占用 & 较高（需要存储多个投票结果） & 较低 \\ \hline
-    训练时间 & 较长（多轮投票需要更多计算） & 较短 \\ \hline
-    训练效果 & 略微提升（但效果不明显） & 较差（可能会受到单次预测的影响） \\ \hline
+    \textbf{指标} & \textbf{正常训练} & \textbf{增强数据集训练} \\ \hline
+    训练时间 & 839.47s & 2099.35s \\ \hline
+    训练效果 & 9.80\% & 12.00\% \\ \hline
+  \end{tabular}
+\end{table}
+\textbf{分析：}\\
+结果显示，我们已经超越了基于原始数据集baseline的训练效果。
+增强数据集的使用能够显著提升模型在数据多样性和鲁棒性上的表现。尽管增强数据集训练的时间较长，但其在训练效果上超越了常规训练，尤其是在数学推理等复杂任务中，增强数据集对提升模型的泛化能力具有显著作用。
+\\
+同时，在构造数据集的过程中，我们发现包含更多符号推导的数据集更能够增强模型的推理能力，相对于使用自然语言推导而言。
+使用自然语言推导的增强数据集，反而会使得模型推理性能减弱，同时最后很难去匹配正确答案。
+\subsubsection{DeepSeek生成的数据集}
+我们使用DeepSeek生成的回答来扩充GSM8K和MATH训练集。DeepSeek能够生成带有详细解答步骤的回答，这种类似蒸馏的过程帮助Qwen2.5B模型提升了数学推理方面的能力。
+\begin{table}[H]
+  \caption{deepseek-基于增强数据集训练与正常训练的微调比对}
+  \label{deepseek-augmentation-comparison-table}
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{指标} & \textbf{正常训练} & \textbf{增强数据集训练} \\ \hline
+    训练时间 & 1054.17s & 1393.15s \\ \hline
+    训练效果 & 27.75\% & 25.55\% \\ \hline
   \end{tabular}
 \end{table}
 
-\textbf{分析：}
-尽管多轮投票机制理论上可以提高鲁棒性，但在实际实验中，该机制未能显著提升模型的准确性。我们认为，这可能是因为多个投票生成的答案存在重复的错误，从而影响了整体效果。此外，多轮投票增加了显存占用和计算开销，未能带来足够的性能提升。
+\textbf{分析：}\\
+这个结果表明，简单地添加更多的数据并不一定能够提升模型的表现，尤其是当这些数据是通过某种生成方式获得的时候。在机器学习和深度学习领域，数据的质量往往比数量更为重要。增强数据集需要有技巧地构造，以确保新加入的数据能够有效地补充原有数据集的不足，提供额外的信息或多样性，而不是简单地重复或引入噪声。
+
+
+\subsection{更大模型验证}
+为了验证我们的数据集的有效性和广泛适用性，我们使用3B模型进行了验证
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{scaling_graph.png} % 插入图片
+  \caption{3B模型于0.5B模型的对比} % 图注
+  \label{fig:my_label2} % 标签
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{compare_graph.png} % 插入图片
+  \caption{效果曲线图} % 图注
+  \label{fig:my_label1} % 标签
+\end{figure}
+
+\textbf{分析：}\\
+通过更大模型的验证，证明了我们的增强数据集的有效性和广泛适应性。
+但更大的模型提高更加有限，还是需要力大砖飞
+
+
+\subsection{多轮投票机制的比对}
+
+\begin{table}[H]
+  \caption{多轮投票机制的比对}
+  \label{voting-mechanism-comparison}
+  \centering
+  \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    \textbf{指标} & \textbf{无投票} & \textbf{一轮投票}  & \textbf{二轮投票}& \textbf{三轮投票}\\ \hline 
+    训练效果 & 28.73\% & 29.69\% & 0\%& 0\% \\ \hline
+  \end{tabular}
+\end{table}
+
+在多轮投票机制中，我们期望通过生成多个回答并进行投票来提升推理的鲁棒性。然而，实验结果表明，多轮投票机制并未显著提升模型的准确性，甚至在某些情况下导致训练效果下降。以下对这一现象进行详细分析：
+
+
+\textbf{1. 错误答案的重复性}
+多轮投票的基本假设是生成多个不同的答案，通过多数投票排除错误。然而，当模型生成的回答存在高度相似的错误时，投票机制无法有效纠正错误。重复的错误答案在投票中占据多数，导致最终结果仍然错误，失去了投票机制的预期优势。
+
+\textbf{2. 模型固有偏差的影响}
+由于模型训练数据或参数设置的固有偏差，生成的答案容易呈现出一致的错误模式。这种情况下，多轮生成并未引入足够的多样性，导致相似的错误答案被多次投票确认，进一步加剧了错误结果的稳定性。
+
+\textbf{3. 生成结果的多样性不足}
+多轮投票的有效性依赖于生成结果的多样性，即多个回答之间需存在一定的逻辑或内容差异。然而，实验中模型生成的回答往往高度一致，缺乏足够的多样性，使得投票机制无法剔除错误答案。此外，模型对问题的理解局限性也限制了结果的生成范围。
+\textbf{4. 训练资源与优化设计限制}
+从实验结果来看，二轮投票和三轮投票的训练效果均为 $0$，可能反映出投票机制设计与模型优化之间存在不匹配。训练过程中资源分配不均或多轮生成策略未经过有效的优化，导致投票机制无法发挥应有的作用。
+
+
+
+
 
 
   
