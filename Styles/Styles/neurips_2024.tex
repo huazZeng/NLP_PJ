@@ -151,24 +151,11 @@
 
 
 \section{RelatedWork}
-\subsection{大语言模型的能力与优化}
-大语言模型（LLMs）在自然语言处理（NLP）任务中展现了革命性能力。Qwen 系列模型通过指令微调开发了面向特定领域的专精模型。其架构结合多参数规模的基础模型和对话模型，通过强化学习与人类反馈调节技术（RLHF）进一步优化，展现出卓越的适应性与问题解决能力 \cite{ref1}。
-
-\subsection{数学推理领域的研究进展}
-数学推理领域的研究历程从符号计算与公式解析发展到基于深度学习的自动化方法。Qwen 在精细预训练和微调策略的支持下，显著提升了复杂推理路径与工具使用的能力，并结合提示工程进一步优化其数学推理表现。然而，现有研究表明，单一模型的微调方法在扩展性和泛化能力上仍存在局限性。例如，Janice Ahn 等人 \cite{ref2} 通过包含 Q-A、Question-Equation-Answer 和 Question-Rationale-Answer 三类数学推理数据集的实验，发现大模型在多样化推理任务中的表现仍有待提升。
-
-
-\subsection{优化技术：LoRA 与数据增强}
-针对大模型微调的高效方法，Hu 等人 \cite{ref3} 提出的低秩适配（LoRA）通过冻结模型的预训练权重并注入可训练的低秩分解矩阵，显著减少了参数与内存开销。在多任务场景下，LoRA 展现了高效的性能优化能力，为提升 LLMs 在特定任务中的表现提供了重要启示。
-
-此外，数据增强技术在数学推理任务中发挥了重要作用。Li 等人 \cite{ref4} 引入 AugGSM8K 和 AugMATH 数据集，通过生成多样化的数学问题与推理路径，有效扩展了训练语料库，并展示了显著的性能提升。然而，现有数据增强方法在跨领域泛化方面仍需进一步探索。
-
-
-\subsection{集成方法的潜力}
-集成方法在提升模型性能方面表现出显著潜力。Trad 等人 \cite{ref5} 提出了提示集成、模型集成与混合集成策略，通过多数投票框架提高了 LLMs 在文本分类与推理任务中的表现。尽管个体模型的性能差异限制了集成方法的整体效果，这些方法为利用 LLMs 的集体智能提供了新的研究方向。
-
-
-
+\subsection{大语言模型的能力与优化}大语言模型（LLMs）在自然语言处理（NLP）任务中展现了革命性能力。QWEN，GPT4.0通过指令微调开发了面向特定领域的专精模型。其架构结合多参数规模的基础模型和对话模型，通过强化学习与人类反馈调节技术（RLHF）进一步优化，展现出卓越的适应性与问题解决能力\cite{3}\cite{8}。
+\subsection{数学推理领域的研究进展}数学推理领域的研究历程从符号计算与公式解析发展到基于深度学习的自动化方法。QWEN在精细预训练和微调策略的支持下，显著提升了复杂推理路径与工具使用的能力，结合提示工程进一步优化了其在数学推理任务中的表现。现有研究中，基于单一模型的微调方法在扩展性和泛化能力上存在一定局限性。例如，Janice Ahn 等人采纳包含 Q-A、Question-Equation-Answer 和 Question-Rationale-Answer 三类数学推理数据集，发现大模型的推理能力仍有不足\cite{4}。此外，在形式化数学推理领域，DeepSeek-Prover-V1.5 引入强化学习和蒙特卡洛树搜索（MCTS）结合的优化方法，显著提升了形式化数学推理的表现。\cite{11}。
+\subsection{优化技术：LoRA与数据增强}针对大模型微调的高效方法，Hu 等人提出的低秩适配（LoRA）通过冻结模型预训练权重并注入可训练的低秩分解矩阵，显著减少了参数与内存开销\cite{5}。在多任务表现优异的LoRA为优化LLMs性能提供了重要启发。
+此外，数据增强技术通过生成多样化的数学问题与推理路径，显著扩展了训练语料库，但跨领域泛化仍需进一步探索。例如，Li 等人通过引入AugGSM8K和AugMATH数据集，展示了多样化数据增强的显著效果\cite{6}\cite{9}\cite{10}。
+\subsection{集成方法的潜力}集成方法在提升性能方面的潜力也受到关注。Trad 等人提出提示集成、模型集成与混合集成策略，通过多数投票框架提高了LLMs在文本分类与推理任务中的表现\cite{8}。尽管其效果受个体性能差异限制，这些方法为利用LLMs集体智能提供了新的研究方向，在数学推理任务中亦表现出一定潜力。
 \subsection{我们的贡献}
 本研究针对大语言模型在数学推理任务中的表现，提出了以下新贡献：
 \begin{itemize}
@@ -179,6 +166,9 @@
     \item 在 GSM8K 和 MATH 数据集上进行了全面实验，验证了我们方法的有效性。
 \end{itemize}
 我们的工作在现有研究的基础上，进一步提升了 Qwen 系列模型在数学推理任务中的表现，并为模型优化与数据增强提供了新的实践经验与分析视角。
+
+
+
 
 \section{Method}
 
@@ -234,6 +224,7 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 
 \subsection{基于SFT与LoRA的微调比对}
 在本部分中，我们比较了全参数微调（SFT）和LoRA微调的效果。我们基于Qwen2-0.5B模型对SFT和LoRA两种微调方法进行了测试，并对比了显存占用、训练时间和训练效果。实验结果如下表所示：
+\\ GSM8K数据集在RTX 4090进行训练。MATH数据集在A10上进行训练。
 
 \begin{figure}[H]
   \centering
@@ -267,13 +258,22 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 %   \end{tabular}
 % \end{table}
 \textbf{分析：}
-全参数微调（SFT）在训练大规模任务时效果较好，但由于需要更新模型的所有参数，其显存占用较高且训练时间较长。相比之下，LoRA微调仅更新少部分适配器矩阵，显著降低了显存占用和训练时间，同时在小规模任务中表现优异，且能够较好地适应不同任务。
+全参数微调（SFT）在训练结果上与LoRA不相上下，但由于需要更新模型的所有参数，其显存占用较高。相比之下，LoRA微调仅更新少部分适配器矩阵，显著降低了显存占用，同时在小规模任务中表现优异，且能够较好地适应不同任务。\\
+但在小模型的测试上我们发现，LoRA的训练时间要长于SFT，可能原因是
+\begin{itemize}
+  \item 模型参数过少的影响：由于模型参数较少，全参微调的和LoRA微调的参数量相差不大，但是LoRA需要初始化以及配置其他参数。
+  \item 低秩矩阵收敛较慢：LoRA通过引入低秩适配器矩阵进行微调，这可能导致梯度更新较慢，收敛时间较长。
+  \item 初始优化状态差异：LoRA的低秩矩阵可能在训练初期需要更多的步骤来调整以适应任务，造成训练时间更长。
+  \item 更新空间较小但复杂：尽管LoRA更新的参数较少，但低秩空间的优化可能需要更多的训练步骤来有效捕捉任务特征。
+  
+\end{itemize}
+
 
 \subsection{基于增强数据集训练与正常训练的微调比对}
-在这部分实验中，我们对比了基于增强数据集训练和正常训练的微调效果。我们通过DeepSeek生成的扩充数据集以及AugGSM8K和AugMATH数据集进行了微调，并评估了训练效果。
+在这部分实验中，我们对比了基于增强数据集训练和正常训练的微调效果。我们对AugGSM8K和AugMATH清洗后的子数据集以及通过DeepSeek生成的扩充数据集进行了微调，并评估了训练效果。
 \subsubsection{基于MuggleMath的数据增强训练}
 我们基于MuggleMath数据，通过正则匹配消去重复数据，并且按一定概率采样，最后提取出两个个15k条的数据集AguGSM8K和AguMATH数据集，用于对比微调效果:
-
+\\ Agu数据集在A10上进行训练。
 \begin{table}[H]
   \caption{基于AguGSM8K训练与正常训练的微调比对}
   \label{gsm8k-augmentation-comparison-table}
@@ -298,6 +298,7 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
     训练效果 & 9.80\% & 12.00\% \\ \hline
   \end{tabular}
 \end{table}
+
 \textbf{分析：}\\
 结果显示，我们已经超越了基于原始数据集baseline的训练效果。
 增强数据集的使用能够显著提升模型在数据多样性和鲁棒性上的表现。尽管增强数据集训练的时间较长，但其在训练效果上超越了常规训练，尤其是在数学推理等复杂任务中，增强数据集对提升模型的泛化能力具有显著作用。
@@ -307,6 +308,7 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 \subsubsection{DeepSeek生成的数据集}
 我们使用DeepSeek生成的回答来扩充GSM8K和MATH训练集。DeepSeek能够生成带有详细解答步骤的回答，这种类似蒸馏的过程帮助Qwen2.5B模型提升了数学推理方面的能力。
 生成的数据集包含15k条数据，但我们没有做更多处理。
+\\以下在RTX 4090上进行了训练。
 \begin{table}[H]
   \caption{deepseek-基于增强数据集训练与正常训练的微调比对}
   \label{deepseek-augmentation-comparison-table}
@@ -325,7 +327,8 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 
 \subsubsection{更大模型验证}
 为了验证我们的数据集的有效性和广泛适用性，我们使用3B模型进行了验证
-
+\\ 3B模型在单张A100上进行训练
+\\ 0.5B模型在单张4090上进行训练
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{scaling_graph.png} % 插入图片
@@ -346,7 +349,7 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 
 
 \subsection{多轮投票机制的比对}
-
+\\以下基于我们通过LoRA在GSM8K数据集上微调的模型进行测试。
 \begin{table}[H]
   \caption{多轮投票机制的比对}
   \label{voting-mechanism-comparison}
@@ -408,17 +411,28 @@ Yuxuan Xie ：3B模型检验方法效果实验，Lora SFT对比实验，论文Re
 
 {
 \small
+\begin{thebibliography}{99}  
 
-[1] Ahn, J., Verma, R., Lou, R., Liu, D., Zhang, R., \& Yin, W. (2024). Large Language Models for Mathematical Reasoning: Progresses and Challenges. {\it arXiv preprint arXiv:2402.00157v4}. Retrieved from \url{https://arxiv.org/abs/2402.00157}. \label{ref1}
+  \bibitem{1} Bai, J., Bai, S., Chu, Y., Cui, Z., Dang, K., Deng, (2023). QWEN Technical Report. {\it arXiv preprint arXiv:2309.16609v1}. Retrieved from \url{https://arxiv.org/abs/2309.16609}.
+  
+  \bibitem{2} Ahn, J., Verma, R., Lou, R., Liu, D., Zhang, R., \& Yin, W. (2024). Large Language Models for Mathematical Reasoning: Progresses and Challenges. {\it arXiv preprint arXiv:2402.00157v4}. Retrieved from \url{https://arxiv.org/abs/2402.00157}.
+  
+  \bibitem{3} Hu, E., Li, Y., Shen, Y., Wang, S., Wallis, P., Wang, L., Allen-Zhu, Z., \& Chen, W. (2021). LoRA: Low-Rank Adaptation of Large Language Models. {\it arXiv preprint arXiv:2106.09685v2}. Retrieved from \url{https://arxiv.org/abs/2106.09685}.
+  
 
-[2] Hu, E., Li, Y., Shen, Y., Wang, S., Wallis, P., Wang, L., Allen-Zhu, Z., \& Chen, W. (2021). LoRA: Low-Rank Adaptation of Large Language Models. {\it arXiv preprint arXiv:2106.09685v2}. Retrieved from \url{https://arxiv.org/abs/2106.09685}. \label{ref2}
+  \bibitem{4} Li, C., Yuan, Z., Yuan, H., Dong, G., Lu, K., Wu, J., Tan, C., Wang, X., \& Zhou, C. (2024). MuggleMath: Assessing the Impact of Query and Response Augmentation on Math Reasoning.{\itarXivpreprintarXiv:2310.05506v3}.Retrievedfrom\url{https://arxiv.org/abs/2310.05506}.
 
-[3] Li, C., Yuan, Z., Yuan, H., Dong, G., Lu, K., Wu, J., Tan, C., Wang, X., \& Zhou, C. (2024). MuggleMath: Assessing the Impact of Query and Response Augmentation on Math Reasoning. {\it arXiv preprint arXiv:2310.05506v3}. Retrieved from \url{https://arxiv.org/abs/2310.05506}. \label{ref3}
+  \bibitem{5} Trad, F., \& Chehab, A. (2024). To Ensemble or Not: Assessing Majority Voting Strategies for Phishing Detection with Large Language Models. {\it arXiv preprint arXiv:2412.00166v1}. Retrieved from \url{https://arxiv.org/abs/2412.00166}.
 
-[4] Trad, F., \& Chehab, A. (2024). To Ensemble or Not: Assessing Majority Voting Strategies for Phishing Detection with Large Language Models. {\it arXiv preprint arXiv:2412.00166v1}. Retrieved from \url{https://arxiv.org/abs/2412.00166}. \label{ref4}
+  \bibitem{6} OpenAI, \emph{Hello GPT-4 Turbo}, \url{https://openai.com/index/hello-gpt-4o/}, 2024. Accessed: 15-Dec-2024.
 
-[5] Bai, J., Bai, S., Chu, Y., Cui, Z., Dang, K., Deng, (2023). QWEN Technical Report. {\it arXiv preprint arXiv:2309.16609v1}. Retrieved from \url{https://arxiv.org/abs/2309.16609}. \label{ref5}
+  \bibitem{7} Zheng Yuan, Hongyi Yuan, Chengpeng Li, Guanting Dong, Keming Lu, Chuanqi Tan, Chang Zhou, Jingren Zhou, \emph{Scaling Relationship on Learning Mathematical Reasoning with Large Language Models}, arXiv:2308.01825, Submitted on 3 Aug 2023 (v1), last revised 13 Sep 2023 (v2), Working in Progress, 2023.
 
+  \bibitem{8} Chengpeng Li, Zheng Yuan, Hongyi Yuan, Guanting Dong, Keming Lu, Jiancan Wu, Chuanqi Tan, Xiang Wang, Chang Zhou, \emph{MuggleMath: Assessing the Impact of Query and Response Augmentation on Math Reasoning}, arXiv:2310.05506, Submitted on 9 Oct 2023 (v1), last revised 17 Jul 2024 (v3), Accepted to ACL 2024 Main Conference, 2024. \url{https://doi.org/10.48550/arXiv.2310.05506}.
+
+  \bibitem{9} Huajian Xin, Z.Z. Ren, Junxiao Song, Zhihong Shao, Wanjia Zhao, Haocheng Wang, Bo Liu, Liyue Zhang, Xuan Lu, Qiushi Du, Wenjun Gao, Qihao Zhu, Dejian Yang, Zhibin Gou, Z.F. Wu, Fuli Luo, Chong Ruan, \emph{DeepSeek-Prover-V1.5: Harnessing Proof Assistant Feedback for Reinforcement Learning and Monte-Carlo Tree Search}, arXiv preprint arXiv:2408.08152, Submitted on 15 Aug 2024. Available at: \url{https://github.com/deepseek-ai/DeepSeek-Prover-V1.5}.
+
+\end{thebibliography}
 }
 
 
