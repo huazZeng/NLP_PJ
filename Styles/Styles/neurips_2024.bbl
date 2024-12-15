@@ -1,0 +1,76 @@
+\begin{thebibliography}{9}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Ahn et~al.(2024)Ahn, Verma, Lou, Liu, Zhang, and
+  Yin]{ahn2024mathreasoning}
+J.~Ahn, R.~Verma, R.~Lou, D.~Liu, R.~Zhang, and W.~Yin.
+\newblock {Large Language Models for Mathematical Reasoning: Progresses and
+  Challenges}.
+\newblock \emph{arXiv preprint arXiv:2402.00157v4}, 2024.
+\newblock URL \url{https://arxiv.org/abs/2402.00157}.
+
+\bibitem[Bai et~al.(2023)Bai, Bai, Chu, Cui, Dang, and Deng]{bai2023qwentech}
+J.~Bai, S.~Bai, Y.~Chu, Z.~Cui, K.~Dang, and Deng.
+\newblock {QWEN Technical Report}.
+\newblock \emph{arXiv preprint arXiv:2309.16609v1}, 2023.
+\newblock URL \url{https://arxiv.org/abs/2309.16609}.
+
+\bibitem[Hu et~al.(2021)Hu, Li, Shen, Wang, Wallis, Wang, Allen-Zhu, and
+  Chen]{hu2021lora}
+E.~Hu, Y.~Li, Y.~Shen, S.~Wang, P.~Wallis, L.~Wang, Z.~Allen-Zhu, and W.~Chen.
+\newblock {LoRA: Low-Rank Adaptation of Large Language Models}.
+\newblock \emph{arXiv preprint arXiv:2106.09685v2}, 2021.
+\newblock URL \url{https://arxiv.org/abs/2106.09685}.
+
+\bibitem[Li et~al.(2024{\natexlab{a}})Li, Yuan, Yuan, Dong, Lu, Wu, Tan, Wang,
+  and Zhou]{li2024mugglemath1}
+C.~Li, Z.~Yuan, H.~Yuan, G.~Dong, K.~Lu, J.~Wu, C.~Tan, X.~Wang, and C.~Zhou.
+\newblock {MuggleMath: Assessing the Impact of Query and Response Augmentation
+  on Math Reasoning}.
+\newblock \emph{arXiv preprint arXiv:2310.05506v3}, 2024{\natexlab{a}}.
+\newblock URL \url{https://arxiv.org/abs/2310.05506}.
+
+\bibitem[Li et~al.(2024{\natexlab{b}})Li, Yuan, Yuan, Dong, Lu, Wu, Tan, Wang,
+  and Zhou]{li2024mugglemath2}
+C.~Li, Z.~Yuan, H.~Yuan, G.~Dong, K.~Lu, J.~Wu, C.~Tan, X.~Wang, and C.~Zhou.
+\newblock {MuggleMath: Assessing the Impact of Query and Response Augmentation
+  on Math Reasoning}.
+\newblock \emph{arXiv preprint arXiv:2310.05506}, 2024{\natexlab{b}}.
+\newblock URL \url{https://doi.org/10.48550/arXiv.2310.05506}.
+\newblock Accepted to ACL 2024 Main Conference.
+
+\bibitem[{OpenAI}(2024)]{openai2024gpt4}
+{OpenAI}.
+\newblock {Hello GPT-4 Turbo}, 2024.
+\newblock URL \url{https://openai.com/index/hello-gpt-4o/}.
+\newblock Accessed: 15-Dec-2024.
+
+\bibitem[Trad and Chehab(2024)]{trad2024ensemble}
+F.~Trad and A.~Chehab.
+\newblock {To Ensemble or Not: Assessing Majority Voting Strategies for
+  Phishing Detection with Large Language Models}.
+\newblock \emph{arXiv preprint arXiv:2412.00166v1}, 2024.
+\newblock URL \url{https://arxiv.org/abs/2412.00166}.
+
+\bibitem[Xin et~al.(2024)Xin, Ren, Song, Shao, Zhao, Wang, Liu, Zhang, Lu, Du,
+  Gao, Zhu, Yang, Gou, Wu, Luo, and Ruan]{xin2024deepseekprover}
+H.~Xin, Z.Z. Ren, J.~Song, Z.~Shao, W.~Zhao, H.~Wang, B.~Liu, L.~Zhang, X.~Lu,
+  Q.~Du, W.~Gao, Q.~Zhu, D.~Yang, Z.~Gou, Z.F. Wu, F.~Luo, and C.~Ruan.
+\newblock {DeepSeek-Prover-V1.5: Harnessing Proof Assistant Feedback for
+  Reinforcement Learning and Monte-Carlo Tree Search}.
+\newblock \emph{arXiv preprint arXiv:2408.08152}, 2024.
+\newblock URL \url{https://github.com/deepseek-ai/DeepSeek-Prover-V1.5}.
+
+\bibitem[Yuan et~al.(2023)Yuan, Yuan, Li, Dong, Lu, Tan, Zhou, and
+  Zhou]{yuan2023scaling}
+Z.~Yuan, H.~Yuan, C.~Li, G.~Dong, K.~Lu, C.~Tan, C.~Zhou, and J.~Zhou.
+\newblock {Scaling Relationship on Learning Mathematical Reasoning with Large
+  Language Models}.
+\newblock \emph{arXiv preprint arXiv:2308.01825v2}, 2023.
+\newblock URL \url{https://arxiv.org/abs/2308.01825}.
+
+\end{thebibliography}
