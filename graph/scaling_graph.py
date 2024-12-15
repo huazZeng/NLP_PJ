@@ -36,6 +36,7 @@ def plot_multi_comparison(data, dataset_name, filename):
         axs[idx].set_title(f'{metric_name} on {dataset_name} Dataset')
         axs[idx].set_xticks(x)
         axs[idx].set_xticklabels(labels)
+        axs[idx].legend()
 
         def add_labels(rects, ax):
             """Attach a text label above each bar in *rects*, displaying its height."""
