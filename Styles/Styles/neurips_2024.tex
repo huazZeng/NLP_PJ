@@ -130,7 +130,7 @@
 
 \begin{abstract}
   数学推理是评估人类智力基本认知能力的基石。近年来，针对自动解决数学问题的大型语言模型LLMs得到了显著发展。
-  我们基于Qwen2.5-0.5B-instruction，探索了全参数SFT，全参数LoRA指令微调的效果，
+  我们基于Qwen2.5-0.5B-instruction，探索了全参数SFT，LoRA指令微调的效果，
   同时，通过数据集增强，提高了模型的性能；我们还在解码阶段加入多轮投票，得到了相关的测试结果。
 \end{abstract}
 
@@ -212,7 +212,7 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 通过这种类似蒸馏的过程来指导Qwen2.5B提升数学推理方面的能力。
 
 \subsection{多数投票推理机制}
-在推理阶段，我们通过多数投票机制以期增强模型推理的鲁班性。
+在推理阶段，我们通过多数投票机制以期增强模型推理的鲁棒性。
 假设模型的正确率为$p$，在多数投票推理阶段生成$r$次回答，则期望的正确回答数量为$p \times r$。
 若考虑最佳情况，其余错误回答均不一致，那么希望从该机制中获得正确回答，则需要$p \times r \ge 2$，即$p \ge \frac{2}{r}$。
 但在实际测试中，该方法反而降低了模型的准确性，这可能是由于模型生成的回答与最佳情况的假设不符，生成了相同的错误答案。
@@ -236,13 +236,13 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.5\textwidth]{GSM8K-LORA.png} % 插入图片
+  \includegraphics[width=1\textwidth]{GSM8K-LORA.png} % 插入图片
   \caption{基于GSM8K数据集的SFT与LoRA微调对比} % 图注
   \label{fig:my_label0} % 标签
 \end{figure}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.5\textwidth]{MATH-LORA.png} % 插入图片
+  \includegraphics[width=1\textwidth]{MATH-LORA.png} % 插入图片
   \caption{基于MATH数据集的SFT与LoRA微调对比} % 图注
   \label{fig:my_label3} % 标签
 \end{figure}
@@ -280,7 +280,7 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 \subsection{基于增强数据集训练与正常训练的微调比对}
 在这部分实验中，我们对比了基于增强数据集训练和正常训练的微调效果。我们对AugGSM8K和AugMATH清洗后的子数据集以及通过DeepSeek生成的扩充数据集进行了微调，并评估了训练效果。
 \subsubsection{基于MuggleMath的数据增强训练}
-我们基于MuggleMath数据，通过正则匹配消去重复数据，并且按一定概率采样，最后提取出两个个15k条的数据集AguGSM8K和AguMATH数据集，用于对比微调效果:
+我们基于MuggleMath数据，通过正则匹配消去重复数据，并且按一定概率采样，最后提取出两个15k条的数据集AguGSM8K和AguMATH数据集，用于对比微调效果:
 \\ Agu数据集在A10上进行训练。
 \begin{table}[H]
   \caption{基于AguGSM8K训练与正常训练的微调比对}
@@ -318,7 +318,7 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 生成的数据集包含15k条数据，但我们没有做更多处理。
 \\以下在RTX 4090上进行了训练。
 \begin{table}[H]
-  \caption{deepseek-基于增强数据集训练与正常训练的微调比对}
+  \caption{基于deepseek增强数据集训练与正常训练的微调比对}
   \label{deepseek-augmentation-comparison-table}
   \centering
   \begin{tabular}{|c|c|c|}
@@ -339,15 +339,15 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
 \\ 0.5B模型在单张4090上进行训练
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.5\textwidth]{scaling_graph.png} % 插入图片
+  \includegraphics[width=1\textwidth]{scaling_graph.png} % 插入图片
   \caption{3B模型与0.5B模型的增强数据集训练对比} % 图注
   \label{fig:my_label2} % 标签
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.5\textwidth]{compare_graph.png} % 插入图片
-  \caption{效果曲线图} % 图注
+  \includegraphics[width=1\textwidth]{compare_graph.png} % 插入图片
+  \caption{3B模型与0.5B模型的效果曲线图} % 图注
   \label{fig:my_label1} % 标签
 \end{figure}
 
@@ -362,10 +362,10 @@ GSM8K和MATH训练集生成回答以扩充训练数据。由于DeepSeek生成的
   \caption{多轮投票机制的比对}
   \label{voting-mechanism-comparison}
   \centering
-  \begin{tabular}{|c|c|c|c|c|}
+  \begin{tabular}{|c|c|c|c|}
     \hline
-    \textbf{指标} & \textbf{无投票} & \textbf{一轮投票}  & \textbf{二轮投票}& \textbf{三轮投票}\\ \hline 
-    训练效果 & 28.73\% & 29.69\% & 0\%& 0\% \\ \hline
+    \textbf{指标}  & \textbf{一轮投票}  & \textbf{二轮投票}& \textbf{三轮投票}\\ \hline 
+    训练效果 & 28.73\%  & 0\%& 0\% \\ \hline
   \end{tabular}
 \end{table}
 
